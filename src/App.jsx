@@ -88,17 +88,27 @@ export default function App() {
       }
 
       const rawRow = parsedData.allRows[rowIndex];
-      return {
+      const mappedRecord = {
         _rowIndex: rowIndex + 1,
-        name: rawRow[mapping.name] || rawRow['name'] || `User #${rowIndex + 1}`,
-        email: rawRow[mapping.email] || rawRow['email'] || '',
-        phone: rawRow[mapping.phone] || rawRow['phone'] || '',
-        amount: rawRow[mapping.amount] || rawRow['amount'] || '0.00',
-        address: rawRow[mapping.address] || rawRow['address'] || '',
-        invoice_no: rawRow[mapping.invoice_no] || rawRow['invoice_no'] || `INV-${1000 + rowIndex + 1}`,
-        date: rawRow[mapping.date] || rawRow['date'] || new Date().toISOString().split('T')[0],
-        description: rawRow[mapping.description] || rawRow['description'] || 'Professional Services',
+        ...rawRow,
       };
+
+      // Add snake_case aliases for all headers in rawRow
+      for (const [key, val] of Object.entries(rawRow)) {
+        const snakeKey = String(key).toLowerCase().trim().replace(/[_\W]+/g, '_');
+        if (!mappedRecord[snakeKey]) {
+          mappedRecord[snakeKey] = val !== undefined && val !== null ? String(val).trim() : '';
+        }
+      }
+
+      // Apply explicit user mappings (targetField -> excelColumnName)
+      for (const [targetField, colName] of Object.entries(mapping)) {
+        if (colName && rawRow[colName] !== undefined) {
+          mappedRecord[targetField] = rawRow[colName];
+        }
+      }
+
+      return mappedRecord;
     },
     [parsedData, mapping, selectedTemplate]
   );
@@ -201,7 +211,9 @@ export default function App() {
       const record = getMappedRow(selectedRowIndex);
       const res = await generateSinglePdfBlob(selectedTemplate.id, selectedTemplate, record);
 
-      const fileName = `${(record.name || 'document').replace(/\s+/g, '_')}_${record.invoice_no || 'doc'}.pdf`;
+      const rawName = record.name || record.owner_name || record['Owner Name'] || 'document';
+      const rawDocId = record.report_no || record.invoice_no || record['Report No'] || 'doc';
+      const fileName = `${String(rawName).replace(/\s+/g, '_')}_${String(rawDocId).replace(/\s+/g, '_')}.pdf`;
       triggerBlobDownload(res.data, fileName);
       showNotification('success', `Downloaded PDF for ${record.name}!`);
     } catch (err) {
@@ -316,6 +328,7 @@ export default function App() {
               parsedData={parsedData}
               isLoading={isLoadingFile}
               onReset={handleResetFile}
+              selectedTemplate={selectedTemplate}
             />
 
             <div className="flex justify-between items-center">
@@ -347,6 +360,7 @@ export default function App() {
               mapping={mapping}
               onMappingChange={handleMappingChange}
               previewRow={parsedData?.allRows?.[0] || {}}
+              template={selectedTemplate}
             />
 
             {/* Quick Data Preview Table */}

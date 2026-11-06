@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Users, Eye, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Users, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function DataPreviewTable({
   records = [],
@@ -36,7 +36,7 @@ export default function DataPreviewTable({
         <div className="flex items-center space-x-2">
           <Users className="w-5 h-5 text-indigo-600" />
           <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-            Imported Users Dataset ({records.length} total)
+            Imported Records ({records.length} total)
           </h3>
           <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
             Page {currentPage} of {totalPages}
@@ -48,7 +48,7 @@ export default function DataPreviewTable({
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search name, email, amount..."
+            placeholder="Search records..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -65,11 +65,11 @@ export default function DataPreviewTable({
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
               <th className="py-3 px-4 w-12 text-center">#</th>
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Contact</th>
-              <th className="py-3 px-4">Amount</th>
-              <th className="py-3 px-4">Address</th>
+              <th className="py-3 px-4">Name / Owner</th>
+              <th className="py-3 px-4">Report / Ref No</th>
+              <th className="py-3 px-4">Date</th>
+              <th className="py-3 px-4">Value / Amount</th>
+              <th className="py-3 px-4">Property / Address</th>
               <th className="py-3 px-4 text-right">Action</th>
             </tr>
           </thead>
@@ -85,11 +85,42 @@ export default function DataPreviewTable({
                 const globalIndex = (currentPage - 1) * pageSize + idx;
                 const isSelected = selectedRowIndex === globalIndex;
 
-                const nameVal = row[mapping.name] || row['name'] || `User #${globalIndex + 1}`;
-                const emailVal = row[mapping.email] || row['email'] || '-';
-                const phoneVal = row[mapping.phone] || row['phone'] || '-';
-                const amountVal = row[mapping.amount] || row['amount'] || '0.00';
-                const addressVal = row[mapping.address] || row['address'] || '-';
+                const nameVal =
+                  row[mapping.name] ||
+                  row['Owner Name'] ||
+                  row['name'] ||
+                  row['Full Name'] ||
+                  `Record #${globalIndex + 1}`;
+
+                const refVal =
+                  row[mapping.report_no] ||
+                  row['Report No'] ||
+                  row['report_no'] ||
+                  row[mapping.invoice_no] ||
+                  row['Invoice No'] ||
+                  row['invoice_no'] ||
+                  '-';
+
+                const dateVal =
+                  row[mapping.date] ||
+                  row['Date'] ||
+                  row['date'] ||
+                  '-';
+
+                const amountVal =
+                  row[mapping.market_value] ||
+                  row['Market Value'] ||
+                  row['market_value'] ||
+                  row[mapping.amount] ||
+                  row['Amount'] ||
+                  row['amount'] ||
+                  '-';
+
+                const addressVal =
+                  row[mapping.address] ||
+                  row['Address'] ||
+                  row['address'] ||
+                  '-';
 
                 return (
                   <tr
@@ -107,8 +138,8 @@ export default function DataPreviewTable({
                     <td className="py-3 px-4 font-semibold text-slate-900">
                       {nameVal}
                     </td>
-                    <td className="py-3 px-4 text-slate-600">{emailVal}</td>
-                    <td className="py-3 px-4 text-slate-600 font-mono text-[11px]">{phoneVal}</td>
+                    <td className="py-3 px-4 text-slate-600 font-mono text-[11px]">{refVal}</td>
+                    <td className="py-3 px-4 text-slate-600">{dateVal}</td>
                     <td className="py-3 px-4 font-bold text-emerald-700">{amountVal}</td>
                     <td className="py-3 px-4 text-slate-500 max-w-[200px] truncate" title={addressVal}>
                       {addressVal}
@@ -169,4 +200,3 @@ export default function DataPreviewTable({
     </div>
   );
 }
-

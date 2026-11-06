@@ -9,6 +9,7 @@ export default function ExcelUploader({
   parsedData,
   isLoading,
   onReset,
+  selectedTemplate = null,
 }) {
   const fileInputRef = useRef(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -45,6 +46,12 @@ export default function ExcelUploader({
     onFileUpload(file);
   };
 
+  const templateId = selectedTemplate?.id || 'valuation-report';
+  const sampleDownloadHref = `${downloadSampleExcelUrl}?templateId=${encodeURIComponent(templateId)}`;
+  const sampleFileName = templateId === 'valuation-report'
+    ? 'Valuation_Report_Dynamic_Data_Sample.xlsx'
+    : 'Dynamic_PDF_Users_Sample.xlsx';
+
   return (
     <div className="space-y-6">
       {/* Top action: Download Sample & instructions */}
@@ -52,20 +59,20 @@ export default function ExcelUploader({
         <div>
           <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
             <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
-            <span>Step 2: Upload Excel Sheet with Dynamic User Data</span>
+            <span>Step 2: Upload Excel Sheet with Dynamic Data</span>
           </h3>
           <p className="text-sm text-slate-500 mt-0.5">
-            Upload your sheet containing users' name, email, contact number, amount, address, etc.
+            Upload your Excel spreadsheet. Each row will generate an independent PDF with highlighted keywords filled.
           </p>
         </div>
 
         <a
-          href={downloadSampleExcelUrl}
-          download="Dynamic_PDF_Users_Sample.xlsx"
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs border border-emerald-200 transition shrink-0"
+          href={sampleDownloadHref}
+          download={sampleFileName}
+          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs border border-emerald-200 transition shrink-0 shadow-sm"
         >
           <Download className="w-4 h-4" />
-          <span>Download Sample Excel</span>
+          <span>Download Sample Excel ({selectedTemplate?.id === 'valuation-report' ? 'Valuation Report' : 'Current Template'})</span>
         </a>
       </div>
 
@@ -136,7 +143,7 @@ export default function ExcelUploader({
                   <span>Sheet: <strong>{parsedData?.sheetName || 'Sheet1'}</strong></span>
                   <span>•</span>
                   <span>
-                    Rows Detected: <strong className="text-indigo-600">{parsedData?.totalRows || 0} users</strong>
+                    Rows Detected: <strong className="text-indigo-600">{parsedData?.totalRows || 0} records</strong>
                   </span>
                 </div>
               </div>
@@ -169,4 +176,3 @@ export default function ExcelUploader({
     </div>
   );
 }
-
